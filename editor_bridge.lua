@@ -1,13 +1,9 @@
-modifier_keys_state = {
-  shift = false,
-  ctrl = false,
-  alt = false
-}
+modifier_keys_state = {shift = false, ctrl = false, alt = false}
 
 function send_input_to_editor(love_keycode)
-    local tmux_keycode = love_to_tmux_key(love_keycode, modifier_keys_state)
+  local tmux_keycode = love_to_tmux_key(love_keycode, modifier_keys_state)
 
-    os.execute("tmux send-keys -t mySession '" .. tmux_keycode .. "'")
+  os.execute("tmux send-keys -t mySession '" .. tmux_keycode .. "'")
 end
 
 function run_editor()
@@ -20,7 +16,8 @@ function grab_editor_output()
   os.execute("tmux capture-pane -t mySession")
   os.execute("tmux save-buffer /tmp/pane_content.txt")
 
-  local handle = io.popen("tmux display-message -p -F '#{cursor_x},#{cursor_y}' -t mySession")
+  local handle = io.popen(
+                     "tmux display-message -p -F '#{cursor_x},#{cursor_y}' -t mySession")
   local cursor_position = handle:read("*a")
   handle:close()
   local x, y = string.match(cursor_position, "(%d+),(%d+)")
@@ -34,17 +31,11 @@ function grab_editor_output()
     print("Error: Failed to open the tmux pane_content.txt file")
   end
 
-  return {
-    content = content,
-    cursor = {
-      x = tonumber(x),
-      y = tonumber(y)
-    }
-  }
+  return {content = content, cursor = {x = tonumber(x), y = tonumber(y)}}
 end
 
 function love_to_tmux_key(love_key, modifier_keys_state)
-    -- rest of the function as it was
+  -- rest of the function as it was
 end
 
 function kill_editor()
