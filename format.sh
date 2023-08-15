@@ -4,3 +4,5 @@ lua-format dimDB.lua > a
 mv a dimDB.lua
 lua-format editor_bridge.lua > a
 mv a editor_bridge.lua
+lua-format tmux.lua > a
+mv a tmux.lua
