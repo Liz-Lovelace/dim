@@ -1,4 +1,3 @@
--- async.lua
 local M = {}
 
 local await_list = {}
@@ -14,7 +13,6 @@ function M.await(condition)
     error("Await can only be used inside a coroutine started by async.start")
   end
 
-  -- Add the current coroutine and condition to the list
   table.insert(await_list, {co = co, condition = condition})
 
   return coroutine.yield()

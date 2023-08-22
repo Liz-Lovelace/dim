@@ -1,6 +1,6 @@
 local tmux = {}
 
-local function execute(command) os.execute(command) end
+local function execute(command) return os.execute(command) end
 
 function tmux.spawn_console(session, command)
   execute("tmux new-session -d -s " .. session .. " '" .. command .. "'")
@@ -21,7 +21,8 @@ function tmux.resize_window(session, width, height)
 end
 
 function tmux.capture_pane(session)
-  execute("tmux capture-pane -t " .. session)
+  local statusCode = execute("tmux capture-pane -t " .. session)
+  if statusCode ~= 0 then return {content = nil, cursor = {x = 0, y = 0}} end
   execute("tmux save-buffer /tmp/pane_content.txt")
 
   local handle = io.popen(

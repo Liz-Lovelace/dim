@@ -10,3 +10,5 @@ lua-format async.lua > a
 mv a async.lua
 lua-format state.lua > a
 mv a state.lua
+lua-format fzf.lua > a
+mv a fzf.lua
