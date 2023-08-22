@@ -12,3 +12,5 @@ lua-format state.lua > a
 mv a state.lua
 lua-format fzf.lua > a
 mv a fzf.lua
+lua-format layout.lua > a
+mv a layout.lua
