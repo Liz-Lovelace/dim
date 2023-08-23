@@ -14,3 +14,7 @@ lua-format fzf.lua > a
 mv a fzf.lua
 lua-format layout.lua > a
 mv a layout.lua
+lua-format draw.lua > a
+mv a draw.lua
+lua-format files.lua > a
+mv a files.lua
