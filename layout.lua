@@ -1,17 +1,69 @@
 local M = {}
+local state = require("state")
 
-local columns = {left = 0, b = 0.475, c = 0.6, d = 0.75, right = 1}
+local columns = {
+  screenLeft = 0,
+  left = 0.01,
+  b = 0.475,
+  c = 0.6,
+  d = 0.75,
+  right = 0.99,
+  screenRight = 1
+}
 
-local rows = {top = 0, b = 0.5875, c = 0.9125, bottom = 1}
+local rows = {
+  screenTop = 0,
+  top = 0.01,
+  b = 0.5875,
+  c = 0.85,
+  bottom = 0.91,
+  screenBottom = 1
+}
+
+M.columns = columns
+M.rows = rows
 
 local viewport = {width = 1, height = 1}
 
+local Box = {}
+Box.__index = Box
+
+function Box:new(box)
+  local instance = setmetatable({}, Box)
+  instance.x1 = box.x1
+  instance.x2 = box.x2
+  instance.y1 = box.y1
+  instance.y2 = box.y2
+  return instance
+end
+
+function Box:getWidth() return self.x2 - self.x1 end
+
+function Box:getHeight() return self.y2 - self.y1 end
+
+function Box:getCharWidth()
+  return math.floor(self:getWidth() / state.get().font.width)
+end
+
+function Box:getCharHeight()
+  return math.floor(self:getHeight() / state.get().font.height)
+end
+
+function Box:inset(width)
+  return Box:new({
+    x1 = self.x1 + width,
+    y1 = self.y1 + width,
+    x2 = self.x2 - width,
+    y2 = self.y2 - width
+  })
+end
+
 local function computeCoordinates(box)
   return {
-    x1 = box.x1 * viewport.width,
-    y1 = box.y1 * viewport.height,
-    x2 = box.x2 * viewport.width,
-    y2 = box.y2 * viewport.height
+    x1 = math.floor(box.x1 * viewport.width),
+    y1 = math.floor(box.y1 * viewport.height),
+    x2 = math.floor(box.x2 * viewport.width),
+    y2 = math.floor(box.y2 * viewport.height)
   }
 end
 
@@ -52,6 +104,12 @@ local boxesTemplate = {
     y1 = rows["c"],
     x2 = columns["d"],
     y2 = rows["bottom"]
+  },
+  runlines = {
+    x1 = columns["screenLeft"],
+    x2 = columns["screenRight"],
+    y1 = rows["bottom"],
+    y2 = rows["screenBottom"]
   }
 }
 
@@ -62,7 +120,7 @@ end
 
 function M.getBox(boxName)
   local box = boxesTemplate[boxName]
-  return computeCoordinates(box)
+  return Box:new(computeCoordinates(box))
 end
 
 return M

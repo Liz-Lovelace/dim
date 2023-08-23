@@ -2,9 +2,10 @@ local tmux = {}
 
 local function execute(command) return os.execute(command) end
 
-function tmux.spawn_console(session, command)
+function tmux.spawn_console(session, command, width, height)
   execute("tmux new-session -d -s " .. session .. " '" .. command .. "'")
   execute("sleep 0.1")
+  tmux.resize_window(session, width, height)
 end
 
 function tmux.kill_console(session) execute("tmux kill-session -t " .. session) end

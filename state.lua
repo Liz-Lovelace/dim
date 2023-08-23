@@ -20,11 +20,6 @@ local function update_recursive(current_state, keys, value)
 end
 
 function M.update(property, newValue)
-  if property == "fileA" then
-    editor.kill()
-    editor.run(newValue)
-  end
-
   local keys = {}
   for part in property:gmatch("[^.]+") do table.insert(keys, part) end
   update_recursive(state, keys, newValue)

@@ -8,10 +8,9 @@ function M.send_input(key, modifier_keys)
   tmux.send_keys(sessionName, key, modifier_keys)
 end
 
-function M.run()
+function M.run(width, height)
   print("starting new tmux session for fzf")
-  tmux.spawn_console(sessionName, "fzf > /tmp/fzfResult ")
-  tmux.resize_window(sessionName, 120, 30)
+  tmux.spawn_console(sessionName, "fzf > /tmp/fzfResult ", width, height)
 end
 
 function M.grab_output() return tmux.capture_pane(sessionName) end
