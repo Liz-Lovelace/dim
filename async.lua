@@ -2,9 +2,9 @@ local M = {}
 
 local await_list = {}
 
-function M.start(func)
+function M.start(func, ...)
   local co = coroutine.create(func)
-  coroutine.resume(co)
+  coroutine.resume(co, ...)
 end
 
 function M.await(condition)

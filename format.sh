@@ -18,3 +18,7 @@ lua-format draw.lua > a
 mv a draw.lua
 lua-format files.lua > a
 mv a files.lua
+lua-format config.lua > a
+mv a config.lua
+lua-format logger.lua > a
+mv a logger.lua

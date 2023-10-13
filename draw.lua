@@ -1,4 +1,5 @@
 local state = require("state")
+local logger = require("logger")
 local editor = require("editor")
 local layout = require("layout")
 local json = require("dkjson")
@@ -31,12 +32,12 @@ function M.editor()
   local pane_output = editor.grab_output()
   if not pane_output.content then return end
   love.graphics.setColor(0, 1, 0)
-  local box = layout.getBox("content")
+  local box = layout.getBox("content"):inset(10)
   love.graphics.rectangle("fill", box.x1 + pane_output.cursor.x *
                               state.get().font.width, box.y1 +
                               pane_output.cursor.y * state.get().font.height,
                           state.get().font.width, state.get().font.height)
-  M.text_in_box(box, pane_output.content)
+  M.text_in_box(box, pane_output.content, 0, 1, 0)
 end
 
 function M.fzf()
@@ -45,23 +46,23 @@ function M.fzf()
   love.graphics.setColor(0, 1, 0)
   -- love.graphics.rectangle("fill", pane_output.cursor.x * state.get().font.width,
   --                         pane_output.cursor.y * state.get().font.height, state.get().font.width, state.get().font.height)
-  M.text_in_box(layout.getBox("content"), pane_output.content)
+  M.text_in_box(layout.getBox("content"), pane_output.content, 0, 1, 0)
 end
 
 function M.state()
   love.graphics.setColor(1, 0, 1)
-  M.text_in_box(layout.getBox("state"),
-                json.encode(state.get(), {indent = true}))
+
+  M.text_in_box(layout.getBox("state"):inset(10), logger.getLog(), 1, 0, 0)
 end
 
 function M.debug()
   love.graphics.setColor(0.1, 1, 0)
-  local box = layout.getBox("debug")
+  local box = layout.getBox("debug"):inset(10)
 
   local y = box.y1
 
-  love.graphics.print("FPS " .. love.timer.getFPS(), box.x1, y)
-  y = y + state.get().font.height
+  -- love.graphics.print("FPS " .. love.timer.getFPS(), box.x1, y)
+  -- y = y + state.get().font.height
 
   local info = files.getFileInfo(state.get().fileA)
   if info then
@@ -81,7 +82,7 @@ end
 
 function M.links()
   local connectedFiles = db.connectedFiles(state.get().fileA)
-  local box = layout.getBox("links")
+  local box = layout.getBox("links"):inset(10)
   local y = box.y1
   for i, file in pairs(connectedFiles) do
     if state.get().chosen_link == i then
@@ -92,6 +93,12 @@ function M.links()
     love.graphics.print(file, box.x1, y)
     y = y + 20
   end
+end
+
+function M.extraText()
+  love.graphics.setColor(0, 1, 1)
+  local box = layout.getBox("extraText"):inset(20)
+  M.text_in_box(box, "MANUAL:\n \n \n   Any mode:\n \nRight ALT - enter Control mode\n(press again to get back to editor)\n \n \n   Control mode:\n \nf - launch fzf\ns - swap FILE A and FILE B\nl - link FILE A and FILE B\nj/k - move link selection down/up\nh - go to selected link\nu - unlink selected link\nr - rename current file\nc - create new file", 0, 0.8, 0)
 end
 
 function M.runlines(box)
@@ -115,22 +122,22 @@ end
 
 function M.filesAB()
   love.graphics.setColor(0, 1, 1)
-  local box = layout.getBox("filesAB")
+  local box = layout.getBox("filesAB"):inset(10)
   love.graphics.print("FILE A: " .. state.get().fileA, box.x1, box.y1)
   love.graphics.print("FILE B: " .. state.get().fileB, box.x1, box.y1 + 20)
 end
 
-function M.text_in_box(box, text)
+function M.text_in_box(box, text, r, g, b)
   love.graphics.setLineWidth(1)
   local y = box.y1
   for line in text:gmatch("[^\n]+") do
     local x = box.x1
     for char in line:gmatch('.') do
-      love.graphics.setColor(0, 1, 0)
+      love.graphics.setColor(r, g, b)
       pcall(function() return love.graphics.print(char, x, y) end)
       x = x + state.get().font.width
     end
-    love.graphics.setColor(0, 0.1, 0)
+    love.graphics.setColor(r*0.1, g*0.1, b*0.1)
     love.graphics.line(box.x1, y + state.get().font.height, box.x2 - 1,
                        y + state.get().font.height)
     y = y + state.get().font.height

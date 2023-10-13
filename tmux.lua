@@ -1,9 +1,11 @@
 local tmux = {}
+local config = require("config")
+local log = require("logger").log
 
 local function execute(command) return os.execute(command) end
 
 function tmux.spawn_console(session, command, width, height)
-  execute("tmux new-session -d -s " .. session .. " '" .. command .. "'")
+  execute("tmux new-session -d -s " .. session .. " 'cd ".. config.baseFileStorePath .."; " .. command .. "'")
   execute("sleep 0.01")
   tmux.resize_window(session, width, height)
 end
@@ -84,7 +86,8 @@ function love_to_tmux_key(love_key, modifier_keys)
     f9 = 'F9',
     f10 = 'F10',
     f11 = 'F11',
-    f12 = 'F12'
+    f12 = 'F12',
+    [';'] = '\\;'
   }
 
   local shift_love_tmux_key_map = {
@@ -138,6 +141,7 @@ function love_to_tmux_key(love_key, modifier_keys)
   }
 
   local tmux_key = love_tmux_key_map[love_key] or love_key
+  log(tmux_key .. love_key)
 
   if modifier_keys.shift then
     tmux_key = shift_love_tmux_key_map[love_key] or tmux_key

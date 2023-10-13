@@ -1,4 +1,5 @@
 local db = require("dimDB")
+local log = require("logger").log
 local async = require("async")
 local state = require("state")
 local editor = require("editor")
@@ -29,9 +30,60 @@ function love.load()
   state.update("focus", "editor")
 
   state.update("frame_number", 0)
+
+  log("WELCOME TO DIM")
 end
 
 function trim(s) return (string.gsub(s, "^%s*(.-)%s*$", "%1")) end
+
+local function checkFileContentChanged()
+    local file = io.open("/tmp/editorModal", "r")
+    if not file then return false end
+    local content = file:read("*all")
+    file:close()
+    return content ~= state.get().editorModalInitialString
+end
+
+local function stringEditorModal(initialString)
+    log("modal editing string '" .. initialString .. "'")
+    editor.kill()
+    local file = io.open("/tmp/editorModal", "w")
+    file:write(initialString)
+    file:close()
+    editor.run("/tmp/editorModal", layout.getBox("content"):inset(10):getCharWidth(), layout.getBox("content"):inset(10):getCharHeight())
+    state.update("focus", "editor")
+
+    state.update("editorModalInitialString", initialString)
+    async.await(checkFileContentChanged)
+    
+    local file = io.open("/tmp/editorModal", "r")
+    local newContent = file:read("*all")
+    file:close()
+
+    editor.kill()
+    if trim(newContent) == "" then
+        state.update("stringEditorModalResult", "EXIT") 
+        return
+    end
+
+    state.update("stringEditorModalResult", newContent) 
+end
+
+local function createNewNote()
+    async.start(stringEditorModal, "")
+
+    async.await(function() return state.get().stringEditorModalResult end)
+    local result = state.get().stringEditorModalResult
+
+    if result == "EXIT" then
+      editor.run(state.get().fileA, layout.getBox("content"):inset(10):getCharWidth(),
+       layout.getBox("content"):inset(10):getCharHeight())
+    else
+        swapIntoA(result)
+    end
+
+    state.update("stringEditorModalResult", nil)
+end
 
 function swapAFromFzf()
   fzf.run(layout.getBox("content"):getCharWidth(),
@@ -46,8 +98,8 @@ end
 
 function swapIntoA(fileName)
   editor.kill()
-  editor.run(fileName, layout.getBox("content"):getCharWidth(),
-             layout.getBox("content"):getCharHeight())
+  editor.run(fileName, layout.getBox("content"):inset(10):getCharWidth(),
+             layout.getBox("content"):inset(10):getCharHeight())
   state.update("fileB", state.get().fileA)
   state.update("fileA", fileName)
   state.update("chosen_link", 1)
@@ -65,7 +117,7 @@ function love.draw()
   draw.boundingbox(layout.getBox("links"))
   draw.boundingbox(layout.getBox("state"))
   draw.boundingbox(layout.getBox("debug"))
-  draw.boundingbox(layout.getBox("log"))
+  draw.boundingbox(layout.getBox("extraText"))
   draw.boundingbox(layout.getBox("filesAB"))
   draw.boundingbox(layout.getBox("focus"))
 
@@ -85,10 +137,11 @@ function love.draw()
   draw.debug()
   draw.links()
   draw.filesAB()
+  draw.extraText()
 end
 
 function interpretControlKey(key, modifier_keys)
-  if key == "e" then
+  if key == "ralt" then
     state.update("focus", "editor")
   elseif key == "f" then
     async.start(swapAFromFzf)
@@ -113,6 +166,10 @@ function interpretControlKey(key, modifier_keys)
                                  .chosen_link]
     if not chosenLinkedFile then return end
     swapIntoA(chosenLinkedFile)
+  elseif key == "c" then
+    async.start(createNewNote)
+  elseif key == "r" then
+    return
   end
 end
 
@@ -149,5 +206,8 @@ function love.keyreleased(key)
   end
 end
 
-function love.quit() editor.kill() end
+function love.quit()
+  db.closeDB()
+  editor.kill()
+end
 

@@ -5,8 +5,8 @@ local columns = {
   screenLeft = 0,
   left = 0.01,
   b = 0.475,
-  c = 0.6,
-  d = 0.75,
+  c = 0.63,
+  d = 0.8,
   right = 0.99,
   screenRight = 1
 }
@@ -14,8 +14,8 @@ local columns = {
 local rows = {
   screenTop = 0,
   top = 0.01,
-  b = 0.5875,
-  c = 0.85,
+  a = 0.1,
+  b = 0.3,
   bottom = 0.91,
   screenBottom = 1
 }
@@ -72,36 +72,36 @@ local boxesTemplate = {
     x1 = columns["left"],
     y1 = rows["top"],
     x2 = columns["b"],
-    y2 = rows["c"]
+    y2 = rows["bottom"]
   },
   links = {
     x1 = columns["b"],
-    y1 = rows["top"],
+    y1 = rows["a"],
     x2 = columns["c"],
-    y2 = rows["c"]
+    y2 = rows["bottom"]
   },
-  state = {
+  debug = {
     x1 = columns["c"],
     y1 = rows["top"],
     x2 = columns["d"],
     y2 = rows["b"]
   },
-  debug = {x1 = columns["c"], y1 = rows["b"], x2 = columns["d"], y2 = rows["c"]},
-  log = {
+  state = {x1 = columns["c"], y1 = rows["b"], x2 = columns["d"], y2 = rows["bottom"]},
+  extraText = {
     x1 = columns["d"],
     y1 = rows["top"],
     x2 = columns["right"],
     y2 = rows["bottom"]
   },
   filesAB = {
-    x1 = columns["left"],
-    y1 = rows["c"],
+    x1 = columns["b"],
+    y1 = rows["top"],
     x2 = columns["c"],
-    y2 = rows["bottom"]
+    y2 = rows["a"]
   },
   focus = {
     x1 = columns["c"],
-    y1 = rows["c"],
+    y1 = rows["bottom"],
     x2 = columns["d"],
     y2 = rows["bottom"]
   },
