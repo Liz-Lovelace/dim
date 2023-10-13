@@ -5,7 +5,8 @@ local log = require("logger").log
 local function execute(command) return os.execute(command) end
 
 function tmux.spawn_console(session, command, width, height)
-  execute("tmux new-session -d -s " .. session .. " 'cd ".. config.baseFileStorePath .."; " .. command .. "'")
+  execute("tmux new-session -d -s " .. session .. " 'cd " ..
+              config.baseFileStorePath .. "; " .. command .. "'")
   execute("sleep 0.01")
   tmux.resize_window(session, width, height)
 end

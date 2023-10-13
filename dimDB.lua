@@ -10,25 +10,21 @@ local function query(queryTemplate, ...)
   local stmt = db:prepare(queryTemplate)
   stmt:bind_values(...)
   local res = stmt:step()
-  if res == sqlite3.DONE or res == sqlite3.ERROR then
-    return nil
-  end
+  if res == sqlite3.DONE or res == sqlite3.ERROR then return nil end
   return stmt:get_value(0)
 end
 
-function M.closeDB()
-  db:close()
-end
+function M.closeDB() db:close() end
 
 function M.initializeDB()
-  db:exec[[
+  db:exec [[
     CREATE TABLE IF NOT EXISTS files (
       id INTEGER PRIMARY KEY,
       filename TEXT UNIQUE
     );
   ]]
 
-  db:exec[[
+  db:exec [[
     CREATE TABLE IF NOT EXISTS links (
       file1_id INTEGER,
       file2_id INTEGER,
@@ -48,7 +44,7 @@ function M.insertFile(filename)
 end
 
 function M.connect(file1, file2)
-  if file1 == file2 then 
+  if file1 == file2 then
     log("LINK CONNECTION ERROR: files are identical")
     return
   end
@@ -59,17 +55,18 @@ function M.connect(file1, file2)
   local file1_id = M.getFileID(file1)
   local file2_id = M.getFileID(file2)
 
-  if file1_id > file2_id then 
-    file1_id, file2_id = file2_id, file1_id 
-  end
+  if file1_id > file2_id then file1_id, file2_id = file2_id, file1_id end
 
-  local existing_link = query("SELECT 1 FROM links WHERE file1_id = ? AND file2_id = ?", file1_id, file2_id)
+  local existing_link = query(
+                            "SELECT 1 FROM links WHERE file1_id = ? AND file2_id = ?",
+                            file1_id, file2_id)
   if existing_link then
     log("LINK CONNECTION ERROR: link already exists")
-    return 
+    return
   end
 
-  query("INSERT INTO links (file1_id, file2_id) VALUES (?, ?)", file1_id, file2_id)
+  query("INSERT INTO links (file1_id, file2_id) VALUES (?, ?)", file1_id,
+        file2_id)
 end
 
 function M.disconnect(file1, file2)
@@ -80,25 +77,23 @@ function M.disconnect(file1, file2)
     log("LINK DISCONNECTION ERROR: one of the files not found")
   end
 
-  if file1_id > file2_id then 
-    file1_id, file2_id = file2_id, file1_id 
-  end
+  if file1_id > file2_id then file1_id, file2_id = file2_id, file1_id end
 
-  query("DELETE FROM links WHERE file1_id = ? AND file2_id = ?", file1_id, file2_id)
+  query("DELETE FROM links WHERE file1_id = ? AND file2_id = ?", file1_id,
+        file2_id)
 end
 
 function M.connectedFiles(file)
   local file_id = M.getFileID(file)
 
-  local query = "SELECT filename FROM files JOIN links ON id = file1_id WHERE file2_id = ? UNION SELECT filename FROM files JOIN links ON id = file2_id WHERE file1_id = ?"
-  
+  local query =
+      "SELECT filename FROM files JOIN links ON id = file1_id WHERE file2_id = ? UNION SELECT filename FROM files JOIN links ON id = file2_id WHERE file1_id = ?"
+
   local stmt = db:prepare(query)
   stmt:bind_values(file_id, file_id)
   local connected = {}
-  
-  for row in stmt:nrows() do
-    table.insert(connected, row.filename)
-  end
+
+  for row in stmt:nrows() do table.insert(connected, row.filename) end
 
   return connected
 end

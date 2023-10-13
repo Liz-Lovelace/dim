@@ -37,52 +37,55 @@ end
 function trim(s) return (string.gsub(s, "^%s*(.-)%s*$", "%1")) end
 
 local function checkFileContentChanged()
-    local file = io.open("/tmp/editorModal", "r")
-    if not file then return false end
-    local content = file:read("*all")
-    file:close()
-    return content ~= state.get().editorModalInitialString
+  local file = io.open("/tmp/editorModal", "r")
+  if not file then return false end
+  local content = file:read("*all")
+  file:close()
+  return content ~= state.get().editorModalInitialString
 end
 
 local function stringEditorModal(initialString)
-    log("modal editing string '" .. initialString .. "'")
-    editor.kill()
-    local file = io.open("/tmp/editorModal", "w")
-    file:write(initialString)
-    file:close()
-    editor.run("/tmp/editorModal", layout.getBox("content"):inset(10):getCharWidth(), layout.getBox("content"):inset(10):getCharHeight())
-    state.update("focus", "editor")
+  log("modal editing string '" .. initialString .. "'")
+  editor.kill()
+  local file = io.open("/tmp/editorModal", "w")
+  file:write(initialString)
+  file:close()
+  editor.run("/tmp/editorModal",
+             layout.getBox("content"):inset(10):getCharWidth(),
+             layout.getBox("content"):inset(10):getCharHeight())
+  state.update("focus", "editor")
 
-    state.update("editorModalInitialString", initialString)
-    async.await(checkFileContentChanged)
-    
-    local file = io.open("/tmp/editorModal", "r")
-    local newContent = file:read("*all")
-    file:close()
+  state.update("editorModalInitialString", initialString)
+  async.await(checkFileContentChanged)
 
-    editor.kill()
-    if trim(newContent) == "" then
-        state.update("stringEditorModalResult", "EXIT") 
-        return
-    end
+  local file = io.open("/tmp/editorModal", "r")
+  local newContent = file:read("*all")
+  file:close()
 
-    state.update("stringEditorModalResult", newContent) 
+  editor.kill()
+  if trim(newContent) == "" then
+    state.update("stringEditorModalResult", "EXIT")
+    return
+  end
+
+  state.update("stringEditorModalResult", newContent)
 end
 
 local function createNewNote()
-    async.start(stringEditorModal, "")
+  async.start(stringEditorModal, "")
 
-    async.await(function() return state.get().stringEditorModalResult end)
-    local result = state.get().stringEditorModalResult
+  async.await(function() return state.get().stringEditorModalResult end)
+  local result = state.get().stringEditorModalResult
 
-    if result == "EXIT" then
-      editor.run(state.get().fileA, layout.getBox("content"):inset(10):getCharWidth(),
-       layout.getBox("content"):inset(10):getCharHeight())
-    else
-        swapIntoA(result)
-    end
+  if result == "EXIT" then
+    editor.run(state.get().fileA,
+               layout.getBox("content"):inset(10):getCharWidth(),
+               layout.getBox("content"):inset(10):getCharHeight())
+  else
+    swapIntoA(result)
+  end
 
-    state.update("stringEditorModalResult", nil)
+  state.update("stringEditorModalResult", nil)
 end
 
 function swapAFromFzf()

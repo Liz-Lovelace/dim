@@ -86,7 +86,12 @@ local boxesTemplate = {
     x2 = columns["d"],
     y2 = rows["b"]
   },
-  state = {x1 = columns["c"], y1 = rows["b"], x2 = columns["d"], y2 = rows["bottom"]},
+  state = {
+    x1 = columns["c"],
+    y1 = rows["b"],
+    x2 = columns["d"],
+    y2 = rows["bottom"]
+  },
   extraText = {
     x1 = columns["d"],
     y1 = rows["top"],

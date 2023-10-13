@@ -27,9 +27,7 @@ function M.getFileInfo(path)
   if not path then return end
   path = config.baseFileStorePath .. path
   local attributes = lfs.attributes(path)
-  if not attributes then
-    return nil
-  end
+  if not attributes then return nil end
 
   local sizeFormatted = M.formatSize(attributes.size)
   local atimeFormatted = M.formatDate(attributes.access)

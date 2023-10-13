@@ -98,7 +98,9 @@ end
 function M.extraText()
   love.graphics.setColor(0, 1, 1)
   local box = layout.getBox("extraText"):inset(20)
-  M.text_in_box(box, "MANUAL:\n \n \n   Any mode:\n \nRight ALT - enter Control mode\n(press again to get back to editor)\n \n \n   Control mode:\n \nf - launch fzf\ns - swap FILE A and FILE B\nl - link FILE A and FILE B\nj/k - move link selection down/up\nh - go to selected link\nu - unlink selected link\nr - rename current file\nc - create new file", 0, 0.8, 0)
+  M.text_in_box(box,
+                "MANUAL:\n \n \n   Any mode:\n \nRight ALT - enter Control mode\n(press again to get back to editor)\n \n \n   Control mode:\n \nf - launch fzf\ns - swap FILE A and FILE B\nl - link FILE A and FILE B\nj/k - move link selection down/up\nh - go to selected link\nu - unlink selected link\nr - rename current file\nc - create new file",
+                0, 0.8, 0)
 end
 
 function M.runlines(box)
@@ -137,7 +139,7 @@ function M.text_in_box(box, text, r, g, b)
       pcall(function() return love.graphics.print(char, x, y) end)
       x = x + state.get().font.width
     end
-    love.graphics.setColor(r*0.1, g*0.1, b*0.1)
+    love.graphics.setColor(r * 0.1, g * 0.1, b * 0.1)
     love.graphics.line(box.x1, y + state.get().font.height, box.x2 - 1,
                        y + state.get().font.height)
     y = y + state.get().font.height
